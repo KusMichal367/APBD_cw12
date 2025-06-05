@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace APBD_cw12.Models;
 
 public class CountryDto
@@ -30,4 +32,26 @@ public class TripPageResponse
     public int AllPages { get; set; }
 
     public List<TripDto> Trips { get; set; }
+}
+
+public class InputClientDto
+{
+    [Required]
+    public String FirstName { get; set; }
+
+    [Required]
+    public String LastName { get; set; }
+
+    [Required, EmailAddress]
+    public String Email { get; set; }
+
+    [Required]
+    public String Telephone { get; set; }
+
+    [Required]
+    [MinLength(11)]
+    [MaxLength(11)]
+    public String PESEL { get; set; }
+
+    public DateTime? PaymentDate { get; set; }
 }

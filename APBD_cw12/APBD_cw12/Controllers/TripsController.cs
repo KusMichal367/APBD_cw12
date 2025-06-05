@@ -22,4 +22,24 @@ public class TripsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("{idTrip}/clients")]
+    public async Task<IActionResult> AddClientToTrip([FromRoute] int idTrip, [FromBody] InputClientDto inputClient)
+    {
+        try
+        {
+            await _tripService.AddClientToTripAsync(idTrip, inputClient);
+            return Ok(new
+                { message = $"Client {inputClient.FirstName} {inputClient.LastName} was added to trip {idTrip}" });
+        }
+        catch (InvalidOperationException e)
+        {
+            return BadRequest(e.Message);
+        }
+
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
+
 }

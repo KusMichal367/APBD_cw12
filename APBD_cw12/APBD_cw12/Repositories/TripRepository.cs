@@ -34,4 +34,28 @@ public class TripRepository: ITripRepository
             .Take(pageSize)
             .ToListAsync();
     }
+
+    public async Task<Client?> GetClientByPeselAsync(string pesel)
+    {
+        return await _context.Clients
+            .FirstOrDefaultAsync(c => c.Pesel == pesel);
+    }
+
+    public async Task<Trip?> GetTripAsync(int idTrip)
+    {
+        return await _context.Trips
+            .Include(t => t.ClientTrips)
+            .ThenInclude(ct => ct.IdClientNavigation)
+            .FirstOrDefaultAsync(t => t.IdTrip == idTrip);
+    }
+
+    public async Task AddClientTripAsync(ClientTrip clientTrip)
+    {
+        await _context.ClientTrips.AddAsync(clientTrip);
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
 }

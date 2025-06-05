@@ -55,4 +55,43 @@ public class TripService : ITripService
             Trips = tripDtos
         };
     }
+
+    public async Task AddClientToTripAsync(int idTrip, InputClientDto inputClient)
+    {
+        var checkPesel = await _tripRepository.GetClientByPeselAsync(inputClient.PESEL);
+
+        if (checkPesel == null)
+        {
+            throw new InvalidOperationException($"Client {inputClient.PESEL} does not exist");
+        }
+
+
+        var trip = await _tripRepository.GetTripAsync(idTrip);
+        if (trip == null)
+        {
+            throw new InvalidOperationException($"Trip {idTrip} does not exist");
+        }
+
+        if (trip.DateFrom <= DateTime.UtcNow)
+        {
+            throw new InvalidOperationException("You cannot register to trip that's in progress or ended");
+        }
+
+        bool alreadRegistered = trip.ClientTrips.Any(ct => ct.IdClient == checkPesel.IdClient);
+        if (alreadRegistered)
+        {
+            throw new InvalidOperationException($"Client {inputClient.PESEL} already registered to trip {trip.IdTrip}");
+        }
+
+        var clientTrip = new ClientTrip
+        {
+            IdClient = checkPesel.IdClient,
+            IdTrip = trip.IdTrip,
+            RegisteredAt = DateTime.UtcNow,
+            PaymentDate = inputClient.PaymentDate,
+        };
+
+        await _tripRepository.AddClientTripAsync(clientTrip);
+        await _tripRepository.SaveChangesAsync();
+    }
 }
